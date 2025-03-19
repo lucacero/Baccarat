@@ -1,14 +1,17 @@
 import random
 import matplotlib.pyplot as plt
 
-def simulate_baccarat(display_plot=True):
-    # Initial parameters
-    balance = 10000
+def simulate_baccarat(starting_bankroll, display_plot = True):
+    if starting_bankroll < 1000:
+        raise ValueError("Starting bankroll must be at least $1,000.")
+    
+    initial_bankroll = starting_bankroll
+    balance = starting_bankroll
     hand_count = 0
     balance_history = [balance]
     
-    # Bet sizing variables: start with $500 bets.
-    bet_size = 500  
+    # Bet sizing: start with 5% of the starting bankroll.
+    bet_size = 0.05 * initial_bankroll
     
     # For the first hand, default to betting on banker.
     last_win = "banker"
@@ -35,29 +38,22 @@ def simulate_baccarat(display_plot=True):
     
     # Run simulation until the balance reaches $0.
     while balance > 0:
-        # --- Adjust bet tier based on current balance ---
+        # --- Adjust bet tier based on current balance relative to starting bankroll ---
+        if balance > 1000000:
+            break # Stop if balance exceeds $1,000,000 due to runtime issues.
+
         old_bet_size = bet_size
+        if balance >= initial_bankroll * 3.0:
+            bet_size = 0.20 * initial_bankroll
+        elif balance >= initial_bankroll * 2.0:
+            bet_size = 0.15 * initial_bankroll
+        elif balance >= initial_bankroll * 1.5:
+            bet_size = 0.10 * initial_bankroll
+        elif balance <= initial_bankroll * 0.5:
+            bet_size = 0.025 * initial_bankroll
+        else:
+            bet_size = 0.05 * initial_bankroll
         
-        # Upgrade/downgrade between $500 and $1,000.
-        if bet_size == 500 and balance >= 15000:
-            bet_size = 1000
-        elif bet_size == 1000 and balance < 11000:
-            bet_size = 500
-        
-        # Upgrade/downgrade between $1,000 and $2,000.
-        if bet_size < 2000 and balance >= 30000:
-            bet_size = 2000
-        elif bet_size == 2000 and balance < 20000:
-            bet_size = 1000 if balance >= 11000 else 500
-        
-        # New Tier: Upgrade to $3,000 if balance reaches $50,000,
-        # and downgrade back to $2,000 if balance goes to $40,000 or less.
-        if bet_size < 3000 and balance >= 50000:
-            bet_size = 3000
-        elif bet_size == 3000 and balance <= 40000:
-            bet_size = 2000
-        
-        # If the bet size decreased from the previous hand, record stop_point (if not already set)
         if bet_size < old_bet_size and stop_point is None:
             stop_point = hand_count
             if display_plot:
@@ -138,7 +134,7 @@ def simulate_baccarat(display_plot=True):
             current_shoe_max_streak = 0
             current_shoe_max_side = None
             current_shoe_max_profit = 0
-
+    
     # Record data for an incomplete shoe if needed.
     if current_shoe_hand_count > 0:
         if current_streak_side is not None and current_streak_length > current_shoe_max_streak:
@@ -178,4 +174,9 @@ def simulate_baccarat(display_plot=True):
     return {"final_balance": balance, "max_balance": max_balance, "hand_count": hand_count, "shoe_streaks": shoe_streaks}
 
 if __name__ == "__main__":
-    simulate_baccarat()
+    try:
+        starting_bankroll = float(input("Enter your starting bankroll (minimum $1,000): "))
+    except ValueError:
+        print("Invalid input. Please enter a valid number.")
+        exit(1)
+    simulate_baccarat(starting_bankroll, display_plot = True)  # Corrected line
