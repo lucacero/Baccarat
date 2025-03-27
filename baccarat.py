@@ -11,10 +11,10 @@ def simulate_baccarat(starting_bankroll, display_plot = True):
     balance_history = [balance]
     
     # Bet sizing: start with 5% of the starting bankroll.
-    bet_size = 0.05 * initial_bankroll
+    bet_size = 0.1 * initial_bankroll
     
     # For the first hand, default to betting on banker.
-    last_win = "banker"
+    last_win = "player"
     
     # Variables for tracking shoe statistics (assume 80 hands per shoe)
     current_shoe_number = 1
@@ -44,15 +44,15 @@ def simulate_baccarat(starting_bankroll, display_plot = True):
 
         old_bet_size = bet_size
         if balance >= initial_bankroll * 3.0:
-            bet_size = 0.20 * initial_bankroll
+            bet_size = 3000 # Maximum bet size
         elif balance >= initial_bankroll * 2.0:
-            bet_size = 0.15 * initial_bankroll
+            bet_size = 2000
         elif balance >= initial_bankroll * 1.5:
-            bet_size = 0.10 * initial_bankroll
+            bet_size = 1500
         elif balance <= initial_bankroll * 0.5:
-            bet_size = 0.025 * initial_bankroll
+            bet_size = 500  # Minimum bet size
         else:
-            bet_size = 0.05 * initial_bankroll
+            bet_size = 1000  # Regular bet size
         
         if bet_size < old_bet_size and stop_point is None:
             stop_point = hand_count
@@ -65,7 +65,7 @@ def simulate_baccarat(starting_bankroll, display_plot = True):
         # --- Simulate one baccarat hand ---
         outcome = random.choices(
             population=["banker", "player", "tie"],
-            weights=[45.86, 44.62, 9.52],
+            weights=[43.6, 44.6, 11.8],
             k=1
         )[0]
         
